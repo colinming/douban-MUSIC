@@ -1,0 +1,82 @@
+<wxs module="m">
+  var formatS = function(time){
+    var m = 0, s = 0
+    m = time/60>10?parseInt(time/60):'0' + parseInt(time/60)
+    s = time%60>10?parseInt(time%60):'0' + parseInt(time%60)
+    
+    return m+':'+s
+  }
+  var formatMs = function(time){
+    var t = time/1000, m = 0, s = 0
+    m = t/60>10?parseInt(t/60):'0' + parseInt(t/60)
+    s = t%60>10?parseInt(t%60):'0' + parseInt(t%60)
+    
+    return m+':'+s
+  }
+  module.exports.formatS = formatS;
+  module.exports.formatMs = formatMs;
+</wxs>
+
+<view class="music-play">
+  <view class="song-header">
+    <text class="play-name">{{songDetail.name}} - {{songDetail.singer}}</text>
+  </view>
+  <image class="song-cover {{ifPlay === true?'song-rotate':''}}" src="{{songDetail.pic}}" mode="scaleToFill"></image>
+
+  <!-- 歌词显示区域 -->
+  <scroll-view class="lrc-wrapper" scroll-y scroll-into-view="{{currentLrc}}" scroll-with-animation="true">
+    <view id="el-{{index}}" class="lrc-detail" wx:for="{{songLrc}}" wx:key="{{index}}">{{songLrc[index]}}</view>
+  </scroll-view>
+
+  <!-- 播放控制条 -->
+  <view class="play-tools">
+    <slider value="{{currentTime}}" min="0" max="{{duration}}" step="1" block-size="15" style="margin-bottom: 0" bindchanging="timeChange" bindchange="change"></slider>
+    <view class="time-range">
+      <text class="now">{{m.formatS(currentTime)}}</text>
+      <text class="duration">{{m.formatS(duration)}}</text>
+    </view>
+    <view class="play-operate">
+      <image class="play-order" src="{{orders[orderIndex]}}" mode="scaleToFill" bindtap="orderTap"></image>
+      <view class="play-contrl">
+        <image class="play-ico" src="../static/images/pre-song.png" mode="scaleToFill" bindtap="preSong"></image>
+        <image class="play-ico" wx:if="{{ifPlay === true}}" src="../static/images/pause.png" mode="scaleToFill" bindtap="pauseSong"></image>
+        <image class="play-ico" wx:else src="../static/images/play2.png" mode="scaleToFill" bindtap="playSong"></image>
+        <image class="play-ico" src="../static/images/next-song.png" mode="scaleToFill" bindtap="nextSong"></image>
+      </view>
+      <image class="play-list" src="../static/images/play-list.png" mode="scaleToFill" bindtap="showList"
+      ></image>
+    </view>
+  </view>
+
+
+
+  <dialog class="{{orderShow === true?'order-show':'order-hide'}}">
+    <view class="order-wrapper">
+      <image class="order-ico" wx:for="{{orders}}" wx:key="{{index}}" src="{{item}}" mode="scaleToFill" bind:tap="selectOrder" data-order-index="{{index}}"></image>
+    </view>
+  </dialog> 
+
+  <action-sheet hidden="{{!listShow}}">
+    <view class="list-wrapper">
+      <view class="list-header">
+        头部
+      </view>
+      <scroll-view class="list-content" scroll-y="true">
+        <block wx:for="{{songList}}" wx:key="{{index}}">
+          <view class="song-wrapper" bind:tap="selectSong" data-current-index="{{index}}">
+            <view class="song-left">
+              <text class="song-num" wx:if="{{currentIndex !== index}}">{{index+1}}</text>
+              <image class="min-cover" wx:else src="{{item.pic}}"></image>
+              <view class="song-detail {{currentIndex === index?'current-song':''}}">
+                <text class="song-name">{{item.name}}</text>
+                <text class="song-art">{{item.singer}}</text>
+              </view>
+            </view>
+            <text class="song-time">{{m.formatS(item.time)}}</text>
+          </view>
+        </block>
+      </scroll-view>
+      <button class="list-footer" bind:tap="closeList">关闭</button>
+    </view>
+  </action-sheet>
+</view> 
